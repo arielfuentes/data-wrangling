@@ -11,3 +11,6 @@ km_abr_15$Evento_POE <- as.character(km_abr_15$Evento_POE)
 km_U6 <- filter(km_abr_15, Unidad == "U6")
 km_U6_PO <- filter(km_abr_15, Tipo_de_km == "PO")
 km_U6_PO <- km_U6_PO[,c(2,6,8)] 
+km_U6_PO$row <- 1:nrow(km_U6_PO)
+library(tidyr)
+km_U6_PO %>% spread(key = Tipo_de_día, value = km_día)
