@@ -1,2 +1,2 @@
 # data-wrangling
-Methods for data-wtangling
+Methods for data-wrangling
