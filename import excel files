@@ -1,0 +1,5 @@
+library(readxl)
+km2 <- read_excel("km2abr15.xls", sheet = 1)
+km1 <- read_excel("7. Kms 1° Quincena Abril 2015.xls", sheet = 1)
+library(dplyr)
+km_abr_15 <- bind_rows(km1, km2)
