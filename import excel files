@@ -1,5 +1,13 @@
 library(readxl)
+#read excel
 km2 <- read_excel("km2abr15.xls", sheet = 1)
 km1 <- read_excel("7. Kms 1° Quincena Abril 2015.xls", sheet = 1)
 library(dplyr)
+#bind datasets
 km_abr_15 <- bind_rows(km1, km2)
+names(km_abr_15) <- c("Mes", "Fecha", "Unidad", "Tipo_de_km", "Evento_POE", "Tipo_de_día", 
+                      "Tipo_de_Bus", "km_día", "km_POE", "km_Apoyo", "km_inyecciones")
+km_abr_15$Evento_POE <- as.character(km_abr_15$Evento_POE)
+km_U6 <- filter(km_abr_15, Unidad == "U6")
+km_U6_PO <- filter(km_abr_15, Tipo_de_km == "PO")
+km_U6_PO <- km_U6_PO[,c(2,6,8)] 
