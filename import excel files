@@ -5,12 +5,36 @@ km1 <- read_excel("7. Kms 1° Quincena Abril 2015.xls", sheet = 1)
 library(dplyr)
 #bind datasets
 km_abr_15 <- bind_rows(km1, km2)
-names(km_abr_15) <- c("Mes", "Fecha", "Unidad", "Tipo_de_km", "Evento_POE", "Tipo_de_día", 
-                      "Tipo_de_Bus", "km_día", "km_POE", "km_Apoyo", "km_inyecciones")
+ names(km_abr_15) <- c("Mes", "Fecha", "Unidad", "Tipo_de_km", "Evento_POE", "Tipo_de_día", 
+                       "Tipo_de_Bus", "km_día", "km_POE", "km_Apoyo", "km_inyecciones")
 km_abr_15$Evento_POE <- as.character(km_abr_15$Evento_POE)
 km_U6 <- filter(km_abr_15, Unidad == "U6")
-km_U6_PO <- filter(km_abr_15, Tipo_de_km == "PO")
-km_U6_PO <- km_U6_PO[,c(2,6,8)] 
+#km PO U6
+km_U6_PO <- filter(km_U6, Tipo_de_km == "PO")
+km_U6_PO <- km_U6_PO[,c(2,6,8)]
+#Adding ID to be able to apply the spread function
 km_U6_PO$row <- 1:nrow(km_U6_PO)
 library(tidyr)
-km_U6_PO %>% spread(key = Tipo_de_día, value = km_día)
+#binding data as a Pivot Table
+km_U6_PO <- km_U6_PO %>% spread(key = Tipo_de_día, value = km_día)
+#rm rows ID
+km_U6_PO <- km_U6_PO[,-2]
+#rm dates columns to sum the num columns
+km_U6_PO_Dia <- km_U6_PO[,2:4]
+#km by day
+km_U6_PO_Dia <- colSums(km_U6_PO_Dia, na.rm = T)
+#all the km
+Tot_km_U6_PO <- sum(km_U6_PO_Dia, na.rm = T)
+#nº of days per type of day
+DomU6 <- subset(km_U6_PO[, 1:2], !is.na(km_U6_PO$Domingo))
+DomU6 <- DomU6 %>% group_by(Fecha) %>% summarise(Dom = sum(Domingo))
+DLNU6 <- subset(km_U6_PO[, c(1,3)], !is.na(km_U6_PO$Laboral))
+DLNU6 <- DLNU6 %>% group_by(Fecha) %>% summarise(DLN=sum(Laboral))
+SabU6 <- subset(km_U6_PO[, c(1,4)], !is.na(km_U6_PO$Sábado))
+ #dplyr doesn't recognize columns name with accents, so let's remove it
+ names(SabU6) <- c("Fecha","Sabado")
+SabU6 <- SabU6 %>% group_by(Fecha) %>% summarise(Sabado = sum(Sabado))
+dias <- c(length(DomU6$Dom), length(DLNU6$DLN), length(SabU6$Sabado))
+#combine two vectors and make a dataframe
+dias_km_U6 <- as.data.frame(rbind(km_U6_PO_Dia,dias))
+########################################################################
