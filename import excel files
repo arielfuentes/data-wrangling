@@ -1,40 +1,63 @@
+#libraries
 library(readxl)
-#read excel
-km2 <- read_excel("km2abr15.xls", sheet = 1)
-km1 <- read_excel("7. Kms 1° Quincena Abril 2015.xls", sheet = 1)
 library(dplyr)
-#bind datasets
-km_abr_15 <- bind_rows(km1, km2)
- names(km_abr_15) <- c("Mes", "Fecha", "Unidad", "Tipo_de_km", "Evento_POE", "Tipo_de_día", 
-                       "Tipo_de_Bus", "km_día", "km_POE", "km_Apoyo", "km_inyecciones")
-km_abr_15$Evento_POE <- as.character(km_abr_15$Evento_POE)
-km_U6 <- filter(km_abr_15, Unidad == "U6")
-#km PO U6
+library(tidyr)
+#read data
+kmejec  <- function(inputkmejec){
+  read_excel(inputkmejec, sheet = 1)
+}
+#bind data
+kme1 <- c("km2abr15.xls")
+kme2 <- c("7. Kms 1° Quincena Abril 2015.xls")
+km_month <- function(kme1, kme2){
+  km_month <- bind_rows(kmejec(kme1), kmejec(kme2))
+  names(km_month) <- c("Mes", "Fecha", "Unidad", "Tipo_de_km", "Evento_POE", "Tipo_de_dia", 
+                       "Tipo_de_Bus", "km_dia", "km_POE", "km_Apoyo", "km_inyecciones")
+  km_month$Evento_POE <- as.character(km_month$Evento_POE)
+  km_month
+}
+#km_month(kme1, kme2)
+############################################
+km_U6_PO <- function(kme1, kme2){
+#subset
+km_U6 <- filter(km_month(kme1, kme2), Unidad == "U6")
 km_U6_PO <- filter(km_U6, Tipo_de_km == "PO")
 km_U6_PO <- km_U6_PO[,c(2,6,8)]
 #Adding ID to be able to apply the spread function
 km_U6_PO$row <- 1:nrow(km_U6_PO)
-library(tidyr)
 #binding data as a Pivot Table
-km_U6_PO <- km_U6_PO %>% spread(key = Tipo_de_día, value = km_día)
+km_U6_PO <- km_U6_PO %>% spread(key = Tipo_de_dia, value = km_dia)
 #rm rows ID
 km_U6_PO <- km_U6_PO[,-2]
+km_U6_PO}
+##########################################
 #rm dates columns to sum the num columns
-km_U6_PO_Dia <- km_U6_PO[,2:4]
-#km by day
-km_U6_PO_Dia <- colSums(km_U6_PO_Dia, na.rm = T)
+km_U6_PO_Dia <- function(kme1, kme2){
+  km_U6_PO_Dia <-  km_U6_PO(kme1, kme2)[,2:4]
+  #km by day
+  km_U6_PO_Dia <- colSums(km_U6_PO_Dia, na.rm = T)
+  km_U6_PO_Dia}
+########################################
 #all the km
-Tot_km_U6_PO <- sum(km_U6_PO_Dia, na.rm = T)
-#nº of days per type of day
-DomU6 <- subset(km_U6_PO[, 1:2], !is.na(km_U6_PO$Domingo))
-DomU6 <- DomU6 %>% group_by(Fecha) %>% summarise(Dom = sum(Domingo))
-DLNU6 <- subset(km_U6_PO[, c(1,3)], !is.na(km_U6_PO$Laboral))
-DLNU6 <- DLNU6 %>% group_by(Fecha) %>% summarise(DLN=sum(Laboral))
-SabU6 <- subset(km_U6_PO[, c(1,4)], !is.na(km_U6_PO$Sábado))
- #dplyr doesn't recognize columns name with accents, so let's remove it
- names(SabU6) <- c("Fecha","Sabado")
-SabU6 <- SabU6 %>% group_by(Fecha) %>% summarise(Sabado = sum(Sabado))
-dias <- c(length(DomU6$Dom), length(DLNU6$DLN), length(SabU6$Sabado))
-#combine two vectors and make a dataframe
-dias_km_U6 <- as.data.frame(rbind(km_U6_PO_Dia,dias))
-########################################################################
+Tot_km_U6_PO <- sum(km_U6_PO_Dia(kme1, kme2), na.rm = T)
+##############nº of days per PO
+km1 <- function(kme1, kme2, date){
+  filter(km_U6_PO(kme1, kme2), Fecha < date)}
+km2 <- function(kme1, kme2, date){
+  filter(km_U6_PO(kme1, kme2), Fecha >= date)}
+#i.e. km2(kme1, kme2,'2015-04-25')
+diasn <- function(km){
+  DomU6n <- subset(km[, 1:2], !is.na(km$Domingo))
+  DomU6n <- DomU6n %>% group_by(Fecha) %>% summarise(Dom = sum(Domingo))
+  DLNU6n <- subset(km[, c(1,3)], !is.na(km$Laboral))
+  DLNU6n <- DLNU6n %>% group_by(Fecha) %>% summarise(DLN=sum(Laboral))
+  SabU6n <- subset(km[, c(1,4)], !is.na(km$Sábado))
+  #dplyr doesn't recognize columns name with accents, so let's remove it
+  names(SabU6n) <- c("Fecha","Sabado")
+  SabU6n <- SabU6n %>% group_by(Fecha) %>% summarise(Sabado = sum(Sabado))
+  ndias <- c(length(DomU6n$Dom), length(DLNU6n$DLN), length(SabU6n$Sabado))
+  names(ndias) <- c("Domingo", "Laboral", "Sábado")
+  ndias
+}
+#i.e. diasn(km2(kme1, kme2,'2015-04-25'))
+as.data.frame(rbind(diasn(km1(kme1, kme2,'2015-04-25')), diasn(km2(kme1, kme2,'2015-04-25'))))
