@@ -60,4 +60,41 @@ diasn <- function(km){
   ndias
 }
 #i.e. diasn(km2(kme1, kme2,'2015-04-25'))
-as.data.frame(rbind(diasn(km1(kme1, kme2,'2015-04-25')), diasn(km2(kme1, kme2,'2015-04-25'))))
+days_PO <- as.data.frame(rbind(diasn(km1(kme1, kme2,'2015-04-25')), diasn(km2(kme1, kme2,'2015-04-25'))))
+days_PO <- days_PO[c(2, 3, 1)]
+##########################################################################
+#read compara
+#check the variable is "km" in the compara sheet (6)
+#eliminate "combine" from the excel
+#the sheet numbers are '3' or '4'
+PO_km  <- function(sheetnum){
+  if ((sheetnum >= 5) | (sheetnum <= 2 )) stop ("put the right number")
+  Compara_km <- read_excel("Consolidado 2012-2013 final yyyy.xlsx", sheet = sheetnum, skip = 6)
+  names(Compara_km) <- c("U.N.", "Codigo_TS", "Codigo_Usuario", "Sentido", "PRENOC1",  "NOC",  "TNOC",	"PMA",	
+                "TPMA",	"FPMA",	"PMD",	"FPTA",	"PTA",	"TPTA",	"FPNOC",	"PRENOC2",	"PRENOC_SAB1",	
+                "NOC_SAB",	"TSAB_MAÑ",	"PMA_SAB",	"MAÑ_SAB",	"PMDSAB",	"TARDE_SAB", "TSAB_NOC",	
+                "PRE_NOC_SAB2",	"PRE_NOC_DOM1",	"NOC_DOM",	"TDOM_MAÑ",	"MAÑ_DOM",	"MED_DOM",
+                "TAR_DOM",	"T_DOM_NOC",	"PRE_NOC_DOM2")
+  Compara_km[1:118,]
+}
+##############################################
+#all the km per type of day 
+km_RBU <- function(sheetnum){
+  if ((sheetnum >= 5) | (sheetnum <= 2 )) stop ("put the right number")
+  PO_km(sheetnum) %>% group_by(Zona = substr(Codigo_Usuario, 1, 1)) %>% 
+    summarise(DLN = sum(PRENOC1, NOC,  TNOC, PMA, TPMA, FPMA,	PMD,	FPTA,	PTA,	TPTA,	FPNOC,	PRENOC2), 
+              SAB = sum(PRENOC_SAB1, NOC_SAB,	TSAB_MAÑ,	PMA_SAB,	MAÑ_SAB,	PMDSAB,	TARDE_SAB, 
+                        TSAB_NOC, PRE_NOC_SAB2), 
+              DOM = sum(PRE_NOC_DOM1,  NOC_DOM,	TDOM_MAÑ,	MAÑ_DOM,	MED_DOM, TAR_DOM,	T_DOM_NOC,	
+                        PRE_NOC_DOM2)) 
+}
+km_Zona <- rbind(km_RBU(3), km_RBU(4))
+km_Zona$PO <- c("PO1", "PO1", "PO2", "PO2")
+#km_Zona <- km_Zona %>% group_by(Zona) %>% summarise(DLN = sum(DLN), SAB = sum(SAB), DOM = sum(DOM))
+km_ZonaB <- subset(km_Zona, km_Zona$Zona == "B")
+km_ZonaC <-subset(km_Zona, km_Zona$Zona == "C")
+km_totB <- km_ZonaB[c(-1, -5)] * days_PO
+km_totC <- km_ZonaC[c(-1, -5)] * days_PO
+km_B <- summarise(km_totB, km_B = sum(DLN, SAB, DOM))
+km_C <- summarise(km_totC, km_C = sum(DLN, SAB, DOM))
+cbind(km_B, km_C)
