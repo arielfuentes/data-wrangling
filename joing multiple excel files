@@ -1,0 +1,19 @@
+library(readxl)
+library(plyr)
+library(dplyr)
+
+files <- list.files()
+f <- list()
+
+for (i in 1:length(files)) {
+  f[[i]] <- read_excel(files[i], sheet = 1, skip = 6)
+}
+
+ltogether <- do.call(rbind,f)
+###########################
+#or
+files2 <- list.files(".", "\\.xls")
+data <- ldply(files2, read_excel, sheet = 1, skip = 6)
+###############################
+#or
+z <- bind_rows(f)
