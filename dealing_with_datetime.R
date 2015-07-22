@@ -6,3 +6,5 @@ C09junpos$V3 <- strptime(C09junpos$V3, "%Y-%m-%d %H:%M:%S")
 C09junpos$V26 <- as.Date(C09junpos$V3)
 #Extract time as character
 C09junpos$V27 <- strftime(C09junpos$V3, format = "%H:%M:%S")
+#chr to hour
+vel_14$v5 <- as.POSIXct(vel_14$V5, format = "%H:%M:%S")
