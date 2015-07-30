@@ -1,0 +1,12 @@
+files <- list.files(path = "data_ddagg/", full.names = TRUE)
+f <- list()
+for (i in 1:length(files)) {
+  f[[i]] <- read.csv(files[i], header = T, sep = ";")
+}
+#################################################
+#or
+files <- list.files(path = "data_ddagg/")
+f <- list()
+for (i in 1:length(files)) {
+  f[[i]] <- read.csv(paste0("data_ddagg/", files[i]), header = T, sep = ";")
+}
