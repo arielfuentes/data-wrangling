@@ -1,0 +1,12 @@
+r_kmejec <- function(filex){
+  library(xlsx)
+  library(dplyr)
+  read.xlsx(filex, sheetIndex = 1, encoding = "UTF-8")
+}
+
+eventos_kmejec <- function(inputxx){
+  library(dplyr)
+  filter(inputxx, Evento.POE != "NA")[,c(2, 3, 5)]
+  }
+
+eventos_kmejec(r_kmejec("22. Kms 2° Quincena Noviembre 2015.xls"))
