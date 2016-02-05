@@ -1,0 +1,3 @@
+ptm <- proc.time()
+#your function here
+proc.time() - ptm
