@@ -1,0 +1,1 @@
+Dda2003 %>% group_by(seg, ParO_D2) %>% na.omit() %>% summarise(PM = sum(PM_Ad12, PM_Est12))
