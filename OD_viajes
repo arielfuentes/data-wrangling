@@ -1,0 +1,285 @@
+OD.viajes <- function(per){
+  library(ff)
+  library(ETLUtils)
+  library(RPostgreSQL)
+  library(dplyr)
+  library(stringr)
+  con <- dbConnect("PostgreSQL", host = "10.222.128.87", user= "postgres", password="estudios2015..", 
+                   dbname = "BASE_U_CHILE")
+  qsql_par.ts <- "SELECT DISTINCT(cod_ts), cod_usu
+  FROM par_ts;"
+  qsql_par.viaje <- paste0("SELECT COUNT(*), paraderosubida, paraderobajada, periodomediodeviaje
+                           FROM viajes201504_transparencia 
+                           WHERE periodomediodeviaje = '",per,"' AND paraderosubida IN ('L-15-6-105-PO',
+                           'L-15-6-115-PO',
+                           'L-15-6-95-PO',
+                           'L-16-14-100-NS',
+                           'L-16-14-105-SN',
+                           'L-16-14-110-NS',
+                           'L-16-14-140-NS',
+                           'L-16-14-80-NS',
+                           'L-16-14-85-SN',
+                           'L-16-14-90-NS',
+                           'L-16-14-95-SN',
+                           'L-16-17-30-OP',
+                           'L-16-17-30-PO',
+                           'L-16-19-40-NS',
+                           'L-16-19-50-NS',
+                           'L-16-21-10-PO',
+                           'L-16-21-15-OP',
+                           'L-16-21-20-OP',
+                           'L-16-21-5-OP',
+                           'L-16-29-10-SN',
+                           'L-17-10-10-SN',
+                           'L-17-10-15-NS',
+                           'L-17-10-20-SN',
+                           'L-17-10-25-NS',
+                           'L-17-10-30-SN',
+                           'L-17-10-35-NS',
+                           'L-17-10-40-SN',
+                           'L-17-10-5-NS',
+                           'L-17-12-5-OP',
+                           'L-17-16-20-NS',
+                           'L-17-16-25-SN',
+                           'L-17-16-30-NS',
+                           'L-17-17-10-SN',
+                           'L-17-17-5-NS',
+                           'L-17-22-10-NS',
+                           'L-17-22-15-SN',
+                           'L-17-22-5-NS',
+                           'L-17-22-5-SN',
+                           'L-17-23-10-SN',
+                           'L-17-23-15-NS',
+                           'L-17-23-5-NS',
+                           'L-17-31-10-SN',
+                           'L-17-31-5-SN',
+                           'L-17-35-10-PO',
+                           'L-17-35-15-PO',
+                           'L-17-35-20-PO',
+                           'L-17-35-5-PO',
+                           'L-17-39-5-SN',
+                           'L-17-41-20-PO',
+                           'L-17-41-25-PO',
+                           'L-17-41-5-OP',
+                           'L-17-42-5-NS',
+                           'L-17-43-5-OP',
+                           'L-17-43-5-PO',
+                           'L-17-45-5-NS',
+                           'L-17-6-5-NS',
+                           'L-17-9-85-NS',
+                           'T-15-136-OP-10',
+                           'T-15-136-OP-15',
+                           'T-15-136-OP-20',
+                           'T-15-136-OP-25',
+                           'T-15-136-OP-3',
+                           'T-15-136-OP-30',
+                           'T-15-136-OP-5',
+                           'T-15-137-NS-10',
+                           'T-15-137-NS-5',
+                           'T-15-137-SN-5',
+                           'T-15-306-OP-10',
+                           'T-15-306-OP-15',
+                           'T-15-306-OP-20',
+                           'T-15-306-OP-25',
+                           'T-15-306-OP-5',
+                           'T-16-136-OP-30',
+                           'T-16-136-OP-35',
+                           'T-16-136-OP-37',
+                           'T-16-136-OP-40',
+                           'T-16-138-OP-10',
+                           'T-16-138-OP-5',
+                           'T-16-138-PO-2',
+                           'T-16-138-PO-4',
+                           'T-16-138-PO-5',
+                           'T-16-326-NS-10',
+                           'T-16-326-SN-5',
+                           'T-17-136-OP-10',
+                           'T-17-136-OP-15',
+                           'T-17-136-OP-20',
+                           'T-17-136-OP-25',
+                           'T-17-136-OP-30',
+                           'T-17-136-OP-35',
+                           'T-17-136-OP-40',
+                           'T-17-136-OP-45',
+                           'T-17-136-OP-5',
+                           'T-17-136-OP-50',
+                           'T-17-136-PO-10',
+                           'T-17-136-PO-15',
+                           'T-17-136-PO-20',
+                           'T-17-136-PO-25',
+                           'T-17-136-PO-30',
+                           'T-17-136-PO-35',
+                           'T-17-136-PO-40',
+                           'T-17-136-PO-45',
+                           'T-17-136-PO-5',
+                           'T-17-136-PO-50',
+                           'T-17-136-PO-55',
+                           'T-17-136-PO-60',
+                           'T-17-136-PO-65',
+                           'T-17-136-PO-70',
+                           'T-17-136-PO-75',
+                           'T-17-136-PO-80',
+                           'T-17-140-OP-17',
+                           'T-17-140-OP-20',
+                           'T-17-140-OP-25',
+                           'T-17-140-OP-30',
+                           'T-17-140-OP-32',
+                           'T-17-140-OP-35',
+                           'T-17-140-OP-37',
+                           'T-17-140-OP-38',
+                           'T-17-140-OP-40',
+                           'T-17-140-PO-25',
+                           'T-17-140-PO-29',
+                           'T-17-140-PO-30',
+                           'T-17-140-PO-35',
+                           'T-17-140-PO-40',
+                           'T-17-140-PO-45',
+                           'T-17-145-PO-5',
+                           'T-17-147-PO-25',
+                           'T-17-147-PO-30',
+                           'T-17-147-PO-35',
+                           'T-17-306-PO-35',
+                           'T-17-306-PO-40',
+                           'T-17-306-PO-45')
+                           GROUP BY paraderosubida, paraderobajada, periodomediodeviaje;")
+  
+  par.ts <- read.dbi.ffdf(dbConnect.args = list(con), query = qsql_par.ts, VERBOSE=TRUE)  
+  par.ts.sube <- as.data.frame(par.ts)
+  names(par.ts.sube) <- c("par.sub", "cod.usu.sub")
+  par.ts.baja <- as.data.frame(par.ts)
+  names(par.ts.baja) <- c("par.baj", "cod.usu.baj")
+  
+  par.viaje <- read.dbi.ffdf(dbConnect.args = list(con), query = qsql_par.viaje, VERBOSE=TRUE) 
+  names(par.viaje) <- c("cuenta", "par.sub", "par.baj", "periodo")
+  par.viaje <- as.data.frame(par.viaje)
+  
+  par.od.viaj <- left_join(par.viaje, par.ts.sube, by = "par.sub")
+  par.od.viaj <- left_join(par.od.viaj, par.ts.baja, by = "par.baj")
+  
+  #write.csv.ffdf(par.od.viaj, paste0(par.od.viaj,per,".csv"))
+
+  dbDisconnect(con)
+  par.od.viaj
+  }
+
+write.OD.viajes <- function(per){
+  write.csv(OD.viajes(per), paste0("par.od.viaj_",per,".csv"), row.names = F)
+}
+
+write.OD.viajes("04 - PUNTA MANANA")
+
+for (per in c("04 - MANANA DOMINGO",
+"05 - MANANA SABADO",
+"05 - MEDIODIA DOMINGO",
+"12 - PRE NOCTURNO",
+"07 - TRANSICION DOMINGO NOCTURNO",
+"06 - PUNTA MEDIODIA SABADO",
+"04 - PUNTA MANANA",
+"02 - NOCTURNO SABADO",
+"09 - PRE NOCTURNO SABADO",
+"07 - TARDE SABADO",
+"07 - PUNTA MEDIODIA",
+"03 - TRANSICION DOMINGO MANANA",
+"02 - NOCTURNO",
+"10 - TRANSICION PUNTA TARDE",
+"08 - TRANSICION SABADO NOCTURNO",
+"11 - FUERA DE PUNTA NOCTURNO",
+"08 - PRE NOCTURNO DOMINGO",
+"05 - TRANSICION PUNTA MANANA",
+"06 - FUERA DE PUNTA MANANA",
+"08 - FUERA DE PUNTA TARDE",
+"02 - NOCTURNO DOMINGO",
+"01 - PRE NOCTURNO DOMINGO",
+"09 - PUNTA TARDE",
+"06 - TARDE DOMINGO",
+"03 - TRANSICION SABADO MANANA",
+"01 - PRE NOCTURNO",
+"01 - PRE NOCTURNO SABADO",
+"04 - PUNTA MANANA SABADO",
+"03 - TRANSICION NOCTURNO")) {
+  write.OD.viajes(per)
+}
+
+# my_list <- list(c("04 - MANANA DOMINGO",
+#              "05 - MANANA SABADO",
+#              "05 - MEDIODIA DOMINGO",
+#              "12 - PRE NOCTURNO",
+#              "07 - TRANSICION DOMINGO NOCTURNO",
+#              "06 - PUNTA MEDIODIA SABADO",
+#              "04 - PUNTA MANANA",
+#              "02 - NOCTURNO SABADO",
+#              "09 - PRE NOCTURNO SABADO",
+#              "07 - TARDE SABADO",
+#              "07 - PUNTA MEDIODIA",
+#              "03 - TRANSICION DOMINGO MANANA",
+#              "02 - NOCTURNO",
+#              "10 - TRANSICION PUNTA TARDE",
+#              "08 - TRANSICION SABADO NOCTURNO",
+#              "11 - FUERA DE PUNTA NOCTURNO",
+#              "08 - PRE NOCTURNO DOMINGO",
+#              "05 - TRANSICION PUNTA MANANA",
+#              "06 - FUERA DE PUNTA MANANA",
+#              "08 - FUERA DE PUNTA TARDE",
+#              "02 - NOCTURNO DOMINGO",
+#              "01 - PRE NOCTURNO DOMINGO",
+#              "09 - PUNTA TARDE",
+#              "06 - TARDE DOMINGO",
+#              "03 - TRANSICION SABADO MANANA",
+#              "01 - PRE NOCTURNO",
+#              "01 - PRE NOCTURNO SABADO",
+#              "04 - PUNTA MANANA SABADO",
+#              "03 - TRANSICION NOCTURNO"))
+# 
+# lapply(my_list, function(x)write.OD.viajes(my_list[[x]], file = paste0(x, '.csv')))
+# 
+# names(my_list)
+# lapply(c("04 - MANANA DOMINGO",
+#          "05 - MANANA SABADO",
+#          "05 - MEDIODIA DOMINGO",
+#          "12 - PRE NOCTURNO",
+#          "07 - TRANSICION DOMINGO NOCTURNO",
+#          "06 - PUNTA MEDIODIA SABADO",
+#          "04 - PUNTA MANANA",
+#          "02 - NOCTURNO SABADO",
+#          "09 - PRE NOCTURNO SABADO",
+#          "07 - TARDE SABADO",
+#          "07 - PUNTA MEDIODIA",
+#          "03 - TRANSICION DOMINGO MANANA",
+#          "02 - NOCTURNO",
+#          "10 - TRANSICION PUNTA TARDE",
+#          "08 - TRANSICION SABADO NOCTURNO",
+#          "11 - FUERA DE PUNTA NOCTURNO",
+#          "08 - PRE NOCTURNO DOMINGO",
+#          "05 - TRANSICION PUNTA MANANA",
+#          "06 - FUERA DE PUNTA MANANA",
+#          "08 - FUERA DE PUNTA TARDE",
+#          "02 - NOCTURNO DOMINGO",
+#          "01 - PRE NOCTURNO DOMINGO",
+#          "09 - PUNTA TARDE",
+#          "06 - TARDE DOMINGO",
+#          "03 - TRANSICION SABADO MANANA",
+#          "01 - PRE NOCTURNO",
+#          "01 - PRE NOCTURNO SABADO",
+#          "04 - PUNTA MANANA SABADO",
+#          "03 - TRANSICION NOCTURNO"), function(x) write.OD.viajes(x))
+
+# library(XLConnect)
+# ##
+# newWB <- loadWorkbook(
+#   filename="C:/Users/Administrador/Documents/PO/Demanda/tb8+tb9/ODserv/viajes_per/tempwb.xlsx",
+#   create=TRUE)
+# ##
+# for(i in per){
+#   wsName <- paste0("newsheet", substr(i,1,22))
+#   createSheet(
+#     newWB,
+#     name=wsName)
+#   ##
+#   writeWorksheet(
+#     newWB,
+#     data=OD.viajes(per),
+#     sheet=wsName,
+#     header=TRUE,
+#     rownames=NULL)
+# }
+# saveWorkbook(newWB)
