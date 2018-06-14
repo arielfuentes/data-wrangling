@@ -1,0 +1,23 @@
+library(foreign)
+DistMetro <- read.dbf("Mitrix-L3-L6.dbf")
+DistMin_BufPar <- function(){
+  library(dplyr)
+  library(tidyr)
+  DistMetro2 <- spread(DistMetro, DESTINATIO, KILOMETERS)
+  DistMetro2$min <- apply(DistMetro2[, c(2:ncol(DistMetro2))], 1, FUN = min)
+  c_col <- c(ncol(DistMetro2)-1)
+  DistMetro2$metro <- colnames(DistMetro2[, c(2:c_col)])[apply(DistMetro2[, 
+                       c(2:c_col)], 1, which.min)]
+  c_col <- c(ncol(DistMetro2)-1)
+  DistMetro2 <- DistMetro2[, c(1, ncol(DistMetro2), c_col)]
+  names(DistMetro2) <- c("StopB", "StopM", "DistKM")
+  DistMetro2
+}
+
+BufParam <- function(distN){
+  library(dplyr)
+  DistMin_BufPar() %>% filter(DistKM <= distN)
+}
+
+NBuffer <- BufParam(0.3)
+write.csv(BufParam(0.3), file = "Buf300m.csv", quote = F, row.names = F)
